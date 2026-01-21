@@ -82,11 +82,11 @@ docker compose logs -f
 
 ### 模块间互联
 1.  **Dify 连接 Xinference**: 
-    在 Dify 管理后台 -> 设置 -> 模型供应商 -> 选择 Xinference，填写 `http://<宿主机IP>:9997`。
-2.  **Xinference 调用 vLLM**: 
-    在 Xinference 界面启动模型时，后端引擎（Engine）选择 `vLLM`。
+    在 Dify 管理后台 -> 设置 -> 模型供应商 -> 选择 Xinference，填写 `http://xinference:9997`。
+2.  **Dify 连接  vLLM**: 
+    在 Dify 管理后台 -> 设置 -> 模型供应商 -> 选择 vLLM，填写 `http://vllm:8000/v1`。
 3.  **Dify 使用 Docling**: 
-    在 Dify Workflow 中添加 HTTP 节点，调用 Docling 服务的 API（默认为 `http://<宿主机IP>:8000/convert`）。
+    在 Dify Workflow 中添加 HTTP 节点，调用 Docling 服务的 API，地址填写`http://docling:5001/v1/convert/file`
 
 ---
 
