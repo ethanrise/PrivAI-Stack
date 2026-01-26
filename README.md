@@ -1,65 +1,67 @@
 # PrivAI-Stack
 
 
-**PrivAI-Stack** (private ai stack) 是一套专为私有化部署打造的 AI 全栈脚手架。它集成了目前开源界最强的四个组件，旨在帮助开发者和企业一键搭建具备“企业级文档解析能力”和“极致推理速度”的本地 AI 工作流。
+**PrivAI-Stack**  (Private AI Stack) is an all-in-one AI scaffolding solution designed specifically for private deployment. It integrates four of the most powerful open-source components available today, aiming to help developers and enterprises quickly set up a local AI workflow with **enterprise-grade document parsing capabilities** and **ultra-fast inference speed**.
 
-## 🚀 核心组件介绍
+> 🇨🇳 [中文版 README](./README_ch.md)
+> 
+## 🚀 Core Components Overview
 
-项目由四个独立的模块组成，每个模块均通过 Docker 进行隔离：
+The project consists of four independent modules, each isolated via Docker:
 
-*   **`docling/`** (IBM 开源): 负责将复杂的 PDF、文档精准转换为 Markdown/JSON，是 RAG 预处理的神器。
-*   **`vllm/`** : 极速推理后端，支持 PagedAttention，适合部署 DeepSeek、Qwen 等主流大模型。
-*   **`xinference/`**: 大模型管理平台，作为 vLLM 的上层封装，统一管理 LLM、Embedding 和 Rerank 模型。
-*   **`dify/`**: 开源的 LLMOps 平台，负责编排工作流、管理知识库及发布 AI 应用。
+*   **`docling/`** (Open-sourced by IBM): Converts complex PDFs and documents accurately into Markdown/JSON—ideal for RAG preprocessing.
+*   **`vllm/`**: Ultra-fast inference backend supporting PagedAttention, suitable for deploying mainstream large models such as DeepSeek and Qwen.
+*   **`xinference/`**: A large model management platform that wraps vLLM at a higher level, providing unified management for LLMs, Embedding, and Rerank models.
+*   **`dify/`**: An open-source LLMOps platform responsible for orchestrating workflows, managing knowledge bases, and publishing AI applications.
 
 ---
 
-## 📂 项目目录结构
+## 📂 Project Directory Structure
 
 ```text
 PrivAI-Stack/
-├── docling/         # Docling API 服务 (解析层)
-├── vllm/            # vLLM 推理引擎 (算力层)
-├── xinference/      # rerank和embedding模型推理引擎（算力层）
-└── dify/            # AI 应用编排平台 (应用层)
+├── docling/         # Docling API service (parsing layer)
+├── vllm/            # vLLM inference engine (compute layer)
+├── xinference/      # Rerank and embedding model inference engine (compute layer)
+└── dify/            # AI application orchestration platform (application layer)
 ```
 
 每个文件夹中均包含：
-- `.env`: 环境变量配置（模型路径、端口、API Key等）。
-- `docker-compose.yml`: 容器编排定义。
+- `.env`: Environment variable configuration (model paths, ports, API keys, etc.).
+- `docker-compose.yml`: Container orchestration definition.
 
 ---
 
-## 🛠️ 快速上手
+## 🛠️  Quick Start
 
-### 1. 克隆项目
+### 1. Clone the repository
 ```bash
 git clone https://github.com/your-username/PrivAI-Stack.git
 cd PrivAI-Stack
 ```
 
-### 2. 逐一启动服务
+### 2. Start services one by one
 
-项目采用独立部署设计，请按需进入目录启动：
+The project uses a decoupled design—start only what you need.
 
-#### A. 部署推理层 (vLLM & Xinference)
-建议先启动推理服务，因为它是后续应用的基础。
+#### A. Deploy the inference layer (vLLM & Xinference)
+It's recommended to start inference services first, as they are prerequisites for upper-layer applications.
 ```bash
 cd xinference
-# 根据需要修改 .env 中的模型存储路径
+# Modify model storage path in .env if needed
 docker compose up -d
-# 查看日志
+# View logs
 docker compose logs -f
 ```
 
-#### B. 部署文档解析 (Docling)
+#### B. Deploy document parser (Docling)
 ```bash
 cd ../docling
 docker compose up -d
 docker compose logs -f
 ```
 
-#### C. 部署应用层 (Dify)
+#### C. Deploy application layer (Dify)
 ```bash
 cd ../dify
 docker compose up -d
@@ -68,47 +70,49 @@ docker compose logs -f
 
 ---
 
-## 📖 操作指南
+## 📖 Operational Guide
 
-### 常用命令
-每个模块都遵循统一的操作规范：
+### Common Commands
+Each module follows the same operational pattern:
 
-| 操作 | 命令 |
+| Action | Command |
 | :--- | :--- |
-| **启动服务** | `docker compose up -d` |
-| **停止服务** | `docker compose down` |
-| **查看实时日志** | `docker compose logs -f` |
-| **重启服务** | `docker compose restart` |
+| **Start service** | `docker compose up -d` |
+| **Stop service** | `docker compose down` |
+| **View live logs** | `docker compose logs -f` |
+| **Restart service** | `docker compose restart` |
 
-### 模块间互联
-1.  **Dify 连接 Xinference**: 
-    在 Dify 管理后台 -> 设置 -> 模型供应商 -> 选择 Xinference，填写 `http://xinference:9997`。
-2.  **Dify 连接  vLLM**: 
-    在 Dify 管理后台 -> 设置 -> 模型供应商 -> 选择 vLLM，填写 `http://vllm:8000/v1`。
-3.  **Dify 使用 Docling**: 
-    在 Dify Workflow 中添加 HTTP 节点，调用 Docling 服务的 API，地址填写`http://docling:5001/v1/convert/file`
-
----
-
-## ⚠️ 注意事项
-
-1.  **硬件要求**: 建议至少配备 24G 显存（如 RTX 3090/4090）以获得流畅体验。
-2.  **驱动程序**: 确保宿主机已安装 `NVIDIA Container Toolkit`。
-3.  **网络配置**: 默认各模块通过宿主机 IP 进行通信，请确保 `.env` 中的端口未被占用。
+### Inter-module Communication
+1.  **Connect Dify to Xinference**: 
+    In Dify Admin → Settings → Model Providers → Choose Xinference, and enter `http://xinference:9997`.
+2.  **Connect Dify to vLLM**: 
+    In Dify Admin → Settings → Model Providers → Choose vLLM, and enter `http://vllm:8000/v1`.
+3.  **Use Docling in Dify**: 
+    In Dify Workflow, add an HTTP node and call Docling’s API at `http://docling:5001/v1/convert/file`
 
 ---
 
-## 🤝 贡献与反馈
+## ⚠️ Notes
 
-如果你在使用过程中发现了 Bug 或有更好的优化建议，欢迎提交 Issue
+1. **Hardware Requirement**: At least 24GB GPU VRAM (e.g., RTX 3090/4090) is recommended for smooth performance.
+2. **Driver Setup**: Ensure the host has the `NVIDIA Container Toolkit` installed.
+3. **Network Configuration**: By default, modules communicate via the host IP. Make sure ports defined in `.env` are not occupied.
+
+
+---
+
+## 🤝 Contributions & Feedback
+
+If you encounter bugs or have suggestions for improvement, feel free to open an Issue!
 
 *   **Author**: Your Name
-*   **Star**: 如果这个项目对你有帮助，请给个 Star ⭐！
+*   **Star**: If this project helps you, please give it a ⭐!
 
 ---
 
-### 💡 为什么选择 PrivAI-Stack？
-*   **完全解耦**: 你可以只启动 `docling` 用作工具，或者只启动 `vllm` 对外提供接口。
-*   **简单纯粹**: 没有复杂的安装脚本，只有最基础的 `.env` 和 `docker-compose`。
-*   **生产可用**: 选用的都是目前业内公认最强的私有化组件。
+### 💡 Why Choose PrivAI-Stack?
+
+*   **Fully Decoupled**: Use only `docling` as a parsing tool, or just `vllm` as an inference API—no forced integration.
+*   **Simple & Clean**: No complex install scripts—only basic `.env` and `docker-compose.yml`.
+*   **Production-Ready**: All components are industry-leading tools for private AI deployments.
 
